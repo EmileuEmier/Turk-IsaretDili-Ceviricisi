@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İşaret Dili Çeviricisi</title>
+    <!-- Link For Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="main.css">
+    <link rel="shortcut icon" href="/PNG's/zLogo.png" type="image/x-icon">
+</head>
+<body>
+    
+    <!-- Header / Navbar -->
+    <header>
+
+        <nav class="navbar section-content">
+            <a href="anasayfa.html" class="nav-logo">
+                <h2 class="logo-text">VODEX</h2>
+            </a>
+
+            <ul class="nav-menu">
+                <button id="menu-close-button" class="fas fa-times"></button>
+
+                <li class="nav-item">
+                    <div class="dropdown">
+                        <a href="anasayfa.html" class="nav-link">Anasayfa</a>
+                    <div>
+                </li>
+                <li class="nav-item">
+                    <div class="dropdown">
+                    <a href="kurumsal.html" class="nav-link">Kurumsal</a>
+                    </div>
+                </li>
+
+                </li>
+                <li class="nav-item">
+                    <div class="dropdown">
+                        <a href="iletişim.html" class="nav-link">İletişim</a>
+                    </div>
+                </li>
+            </ul>
+            
+            <button id="menu-open-button" class="fas fa-bars"></button>
+        </nav>
+
+    </header>
+
+    <main>
+
+        <!-- Contact section -->
+        <section class="contact-section" id="iletişim">
+        <h2 class="section-title">Bizimle İletişime Geçin</h2>
+        <div class="section-content">
+            <ul class="contact-info-list">
+
+                <li class="contact-info">
+                    <i class="fa-solid fa-location-crosshairs"></i>
+                    <p>Yenimahalle Fen Lisesi</p>
+                </li>
+
+                <li class="contact-info">
+                    <i class="fa-solid fa-envelope"></i>
+                    <p>emiraytekin61@gmail.com</p>
+                </li>
+
+            </ul>
+
+            <form form action="https://api.web3forms.com/submit" method="POST" class="contact-form">
+                <input type="hidden" name="access_key" value="3027d382-bb67-4a0d-a3bc-dadee98503ad">
+                <input type="text" placeholder="Ad" name="name" class="form-input" required>
+                <input type="email" placeholder="E-Mail" name="email" class="form-input" required>
+                <textarea placeholder="Mesaj" name="message" class="form-input" required></textarea>
+                <button type="submit" class="submit-button">Gönder</button>  
+            </form>
+        </div>
+        </section>
+
+        <!-- Loader -->
+        <div class="loader"></div>
+
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
