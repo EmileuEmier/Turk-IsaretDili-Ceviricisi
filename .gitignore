@@ -1,0 +1,16 @@
+# Python önbellek dosyaları (Gereksiz sistem dosyaları)
+__pycache__/
+*.pyc
+
+# Sanal ortam klasörleri (Eğer kullanıyorsan)
+venv/
+env/
+.venv/
+
+# Büyük Boyutlu Veri Setleri (GitHub'a yüklenmemesi gerekenler)
+# NOT: Veri setini yüklemiyoruz çünkü binlerce .npy dosyası yüklemeyi imkansız kılar.
+veriseti/
+
+# İşletim sistemi kalıntıları
+.DS_Store
+Thumbs.db

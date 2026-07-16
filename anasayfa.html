@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İşaret Dili Çeviricisi</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="main.css">
+
+
+    <style>
+        body {
+            padding-top: 5%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f0f0f;
+            color: white;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .anasayfa-title { color: #00d2ff; margin-bottom: 30px; }
+
+        /* Ana Panel Düzeni */
+        .main-panel {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            align-items: flex-start;
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* Sol Taraf: Kamera */
+        .camera-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #videoElement { display: none; }
+
+        #output_canvas {
+            border: 3px solid #333;
+            border-radius: 12px;
+            transform: scaleX(-1);
+            background-color: #000;
+            width: 540px; /* Genişlik bir miktar optimize edildi */
+            height: auto;
+        }
+
+        /* Sağ Taraf: Yazı Kayıt Bölümü */
+        .record-section {
+            width: 300px;
+            height: 405px; /* Kamera yüksekliğiyle uyumlu */
+            display: flex;
+            flex-direction: column;
+            background: #252525;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #444;
+        }
+
+        .status-box {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #00d2ff;
+            margin-bottom: 15px;
+            text-align: center;
+            height: 25px;
+        }
+
+        .sentence-box {
+            flex-grow: 1;
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-content: flex-start;
+            overflow-y: auto;
+        }
+
+        /* Kelime Rozetleri */
+        .word-badge {
+            background: #00d2ff;
+            color: #000;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .word-badge:hover {
+            background: #ff4757;
+            color: white;
+        }
+
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .temizle-button {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        
+        .hint {
+            font-size: 0.75rem;
+            color: #777;
+            text-align: center;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header / Navbar -->
+    <header>
+
+        <nav class="navbar section-content">
+            <a href="anasayfa.html" class="nav-logo">
+                <h2 class="logo-text">VODEX</h2>
+            </a>
+
+            <ul class="nav-menu">
+                <button id="menu-close-button" class="fas fa-times"></button>
+
+                <li class="nav-item">
+                    <div class="dropdown">
+                        <a href="anasayfa.html" class="nav-link">Anasayfa</a>
+                    <div>
+                </li>
+                <li class="nav-item">
+                    <div class="dropdown">
+                    <a href="kurumsal.html" class="nav-link">Kurumsal</a>
+                    </div>
+                </li>
+
+                </li>
+                <li class="nav-item">
+                    <div class="dropdown">
+                        <a href="iletişim.html" class="nav-link">İletişim</a>
+                    </div>
+                </li>
+            </ul>
+            
+            <button id="menu-open-button" class="fas fa-bars"></button>
+        </nav>
+
+    </header>
+
+    <h1 class="anasayfa-title">İşaret Dili Çevirmen Paneli</h1>
+
+    <div class="main-panel">
+        <div class="camera-section">
+            <video id="videoElement"></video>
+            <canvas id="output_canvas" width="640" height="480"></canvas>
+        </div>
+
+        <div class="record-section">
+            <div class="status-box" id="status">Kamera bekleniyor...</div>
+            
+            <div id="sentenceBox" class="sentence-box">
+                </div>
+
+            <div class="controls">
+                <button class="temizle-button" onclick="clearAll()">Listeyi Temizle</button>
+                <div class="hint">Silmek için kelimenin üzerine basınız.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+            const videoElement = document.getElementById('videoElement');
+            const canvasElement = document.getElementById('output_canvas');
+            const canvasCtx = canvasElement.getContext('2d');
+            const statusText = document.getElementById('status');
+            const sentenceBox = document.getElementById('sentenceBox');
+
+            let lastAddedWord = "";
+
+            // Kamerayı aç
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    videoElement.srcObject = stream;
+                    videoElement.play();
+                });
+
+            // Canvas'a çiz + server'a gönder
+            videoElement.addEventListener('loadeddata', () => {
+                setInterval(() => {
+                    canvasCtx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+                    sendFrameToServer();
+                }, 80);
+            });
+
+            async function sendFrameToServer() {
+                const imageData = canvasElement.toDataURL("image/jpeg");
+
+                try {
+                    const response = await fetch("http://127.0.0.1:5000/predict", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ image: imageData })
+                    });
+
+                    const data = await response.json();
+                    let prediction = data.prediction;
+
+                    // Eğer boş geldiyse
+                    if (!prediction || prediction.trim() === "") {
+                        prediction = "İşaret Bekleniyor...";
+                    }
+
+                    // Küçük mavi kutuya yaz
+                    statusText.innerText = prediction;
+
+                    // Eğer gerçekten bir komutsa listeye ekle
+                    if (prediction !== "İşaret Bekleniyor..." && prediction !== lastAddedWord) {
+                        addWordToList(prediction);
+                        lastAddedWord = prediction;
+                    }
+
+                } catch (error) {
+                    statusText.innerText = "Sunucu Bağlantı Hatası";
+                }
+            }
+
+            function addWordToList(word) {
+                const badge = document.createElement('span');
+                badge.className = 'word-badge';
+                badge.innerText = word;
+                badge.onclick = function() { this.remove(); };
+                sentenceBox.appendChild(badge);
+                sentenceBox.scrollTop = sentenceBox.scrollHeight;
+            }
+
+            function clearAll() {
+                sentenceBox.innerHTML = "";
+                lastAddedWord = "";
+            }
+    </script>
+
+
+
+    <!-- Linking Swiper Script -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <!-- Linking custom Script -->
+    <script src="script.js"></script>
+</body>
+</html>
